@@ -32,7 +32,7 @@ jobs:
       - name: Patch code for iOS clang build
         run: |
           sed -i '1i extern void COF_Inventory_VidInit(); extern void COF_Inventory_Draw(float flTime);' src/cof/cl_dll/cdll_int.cpp
-          sed -i 's/STRING( iszText )\[0\]/(STRING( iszText ))[0]/g' src/cof/dlls/cof_utils.h
+          sed -i 's/(const char \*)(gpGlobals->pStringBase + (int)offset)/((const char *)(gpGlobals->pStringBase + (int)offset))/g' src/cof/dlls/util.h
 
       - name: Configure and build CoF dylibs for iOS arm64
         run: |
