@@ -29,6 +29,10 @@ jobs:
             sudo cp -a "$SDK_DIR/." /opt/iPhoneOS.sdk/
           fi
 
+      - name: Patch missing VGUI inventory declarations for iOS
+        run: |
+          sed -i '1i extern void COF_Inventory_VidInit(); extern void COF_Inventory_Draw(float flTime);' src/cof/cl_dll/cdll_int.cpp
+
       - name: Configure and build CoF dylibs for iOS arm64
         run: |
           cat << 'EOF' > ios-toolchain.cmake
