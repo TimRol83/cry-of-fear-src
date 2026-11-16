@@ -13,10 +13,11 @@ jobs:
       - name: Setup iOS cross-compiler toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build clang lld
+          sudo apt-get install -y cmake ninja-build clang lld xz-utils
           git clone --depth=1 https://github.com /tmp/theos-sdks
           sudo mkdir -p /opt/ios-sdk
-          sudo cp -a /tmp/theos-sdks/iPhoneOS*.sdk/. /opt/ios-sdk/
+          SDK_ARCHIVE=$(ls /tmp/theos-sdks/iPhoneOS16*.sdk.tar.xz | head -n 1)
+          sudo tar -xf "$SDK_ARCHIVE" -C /opt/ios-sdk --strip-components=1
 
       - name: Configure and build CoF dylibs for iOS arm64
         run: |
