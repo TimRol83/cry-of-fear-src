@@ -1,0 +1,34 @@
+name: Build Cry of Fear for iOS-arm64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure and build CoF dylibs for iOS arm64
+        run: |
+          cmake -S src/cof -B build/cof-ios \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -D64BIT=ON \
+            -DGAMEDIR=cryoffear \
+            -DCMAKE_INSTALL_PREFIX="$PWD/out/ios" \
+            -DSERVER_INSTALL_DIR=cl_dlls \
+            -DCLIENT_INSTALL_DIR=cl_dlls \
+            -DUSE_VGUI=OFF \
+            -DUSE_NOVGUI_MOTD=ON \
+            -DUSE_NOVGUI_SCOREBOARD=ON
+          cmake --build build/cof-ios --parallel "$(sysctl -n hw.logicalcpu)" --target install
+
+      - name: Upload iOS arm64 dylibs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryoffear-ios-arm64-dylibs
+          path: out/ios/cryoffear/cl_dlls/
