@@ -10,18 +10,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Checkout iOS SDK
+        uses: actions/checkout@v4
+        with:
+          repository: theos/sdks
+          path: ios-sdks-repo
+
       - name: Setup iOS cross-compiler toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build clang lld xz-utils
-          git clone --depth=1 https://github.com /tmp/theos-sdks
           sudo mkdir -p /opt/ios-sdk
-          ls -la /tmp/theos-sdks
-          SDK_ARCHIVE=$(find /tmp/theos-sdks -name "iPhoneOS*.tar.*" | sort -V | tail -n 1)
+          SDK_ARCHIVE=$(find ios-sdks-repo -name "iPhoneOS*.tar.*" | sort -V | tail -n 1)
           if [ -n "$SDK_ARCHIVE" ]; then
             sudo tar -xf "$SDK_ARCHIVE" -C /opt/ios-sdk --strip-components=1
           else
-            SDK_DIR=$(find /tmp/theos-sdks -maxdepth 2 -type d -name "iPhoneOS*.sdk" | sort -V | tail -n 1)
+            SDK_DIR=$(find ios-sdks-repo -maxdepth 2 -type d -name "iPhoneOS*.sdk" | sort -V | tail -n 1)
             sudo cp -a "$SDK_DIR/." /opt/ios-sdk/
           fi
 
