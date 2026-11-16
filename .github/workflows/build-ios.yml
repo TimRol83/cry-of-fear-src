@@ -20,13 +20,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build clang lld xz-utils
-          sudo mkdir -p /opt/ios-sdk
+          sudo mkdir -p /opt/iPhoneOS.sdk
           SDK_ARCHIVE=$(find ios-sdks-repo -name "iPhoneOS*.tar.*" | sort -V | tail -n 1)
           if [ -n "$SDK_ARCHIVE" ]; then
-            sudo tar -xf "$SDK_ARCHIVE" -C /opt/ios-sdk --strip-components=1
+            sudo tar -xf "$SDK_ARCHIVE" -C /opt/iPhoneOS.sdk --strip-components=1
           else
             SDK_DIR=$(find ios-sdks-repo -maxdepth 2 -type d -name "iPhoneOS*.sdk" | sort -V | tail -n 1)
-            sudo cp -a "$SDK_DIR/." /opt/ios-sdk/
+            sudo cp -a "$SDK_DIR/." /opt/iPhoneOS.sdk/
           fi
 
       - name: Configure and build CoF dylibs for iOS arm64
@@ -35,15 +35,15 @@ jobs:
           set(CMAKE_SYSTEM_NAME iOS)
           set(CMAKE_SYSTEM_PROCESSOR arm64)
           set(CMAKE_OSX_ARCHITECTURES arm64)
-          set(CMAKE_OSX_SYSROOT /opt/ios-sdk)
+          set(CMAKE_OSX_SYSROOT /opt/iPhoneOS.sdk)
           set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
           set(CMAKE_C_COMPILER clang)
           set(CMAKE_CXX_COMPILER clang++)
-          set(CMAKE_C_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/ios-sdk")
-          set(CMAKE_CXX_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/ios-sdk")
-          set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld -L/opt/ios-sdk/usr/lib")
-          set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld -L/opt/ios-sdk/usr/lib")
-          set(CMAKE_FIND_ROOT_PATH /opt/ios-sdk)
+          set(CMAKE_C_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/iPhoneOS.sdk")
+          set(CMAKE_CXX_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/iPhoneOS.sdk")
+          set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld -L/opt/iPhoneOS.sdk/usr/lib")
+          set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld -L/opt/iPhoneOS.sdk/usr/lib")
+          set(CMAKE_FIND_ROOT_PATH /opt/iPhoneOS.sdk)
           set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
           set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
           set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
