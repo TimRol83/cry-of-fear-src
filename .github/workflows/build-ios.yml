@@ -16,8 +16,14 @@ jobs:
           sudo apt-get install -y cmake ninja-build clang lld xz-utils
           git clone --depth=1 https://github.com /tmp/theos-sdks
           sudo mkdir -p /opt/ios-sdk
-          SDK_ARCHIVE=$(ls /tmp/theos-sdks/iPhoneOS16*.sdk.tar.xz | head -n 1)
-          sudo tar -xf "$SDK_ARCHIVE" -C /opt/ios-sdk --strip-components=1
+          ls -la /tmp/theos-sdks
+          SDK_ARCHIVE=$(find /tmp/theos-sdks -name "iPhoneOS*.tar.*" | sort -V | tail -n 1)
+          if [ -n "$SDK_ARCHIVE" ]; then
+            sudo tar -xf "$SDK_ARCHIVE" -C /opt/ios-sdk --strip-components=1
+          else
+            SDK_DIR=$(find /tmp/theos-sdks -maxdepth 2 -type d -name "iPhoneOS*.sdk" | sort -V | tail -n 1)
+            sudo cp -a "$SDK_DIR/." /opt/ios-sdk/
+          fi
 
       - name: Configure and build CoF dylibs for iOS arm64
         run: |
