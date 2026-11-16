@@ -5,17 +5,43 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup iOS cross-compiler toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang lld curl xz-utils
+          curl -L https://github.com -o cctools.tar.xz
+          sudo tar -xf cctools.tar.xz -C /usr/local --strip-components=1
+          curl -L https://github.com -o ios.sdk.tar.xz
+          sudo mkdir -p /opt/ios-sdk
+          sudo tar -xf ios.sdk.tar.xz -C /opt/ios-sdk --strip-components=1
+
       - name: Configure and build CoF dylibs for iOS arm64
         run: |
-          cmake -S src/cof -B build/cof-ios \
-            -DCMAKE_SYSTEM_NAME=iOS \
-            -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+          cat << 'EOF' > ios-toolchain.cmake
+          set(CMAKE_SYSTEM_NAME iOS)
+          set(CMAKE_SYSTEM_PROCESSOR arm64)
+          set(CMAKE_OSX_ARCHITECTURES arm64)
+          set(CMAKE_OSX_SYSROOT /opt/ios-sdk)
+          set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+          set(CMAKE_C_COMPILER clang)
+          set(CMAKE_CXX_COMPILER clang++)
+          set(CMAKE_C_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/ios-sdk")
+          set(CMAKE_CXX_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/ios-sdk")
+          set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld -L/opt/ios-sdk/usr/lib")
+          set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld -L/opt/ios-sdk/usr/lib")
+          set(CMAKE_FIND_ROOT_PATH /opt/ios-sdk)
+          set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+          set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+          set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+          EOF
+
+          cmake -S src/cof -B build/cof-ios -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$PWD/ios-toolchain.cmake" \
             -DCMAKE_BUILD_TYPE=Release \
             -D64BIT=ON \
             -DGAMEDIR=cryoffear \
@@ -25,7 +51,7 @@ jobs:
             -DUSE_VGUI=OFF \
             -DUSE_NOVGUI_MOTD=ON \
             -DUSE_NOVGUI_SCOREBOARD=ON
-          cmake --build build/cof-ios --parallel "$(sysctl -n hw.logicalcpu)" --target install
+          cmake --build build/cof-ios --target install
 
       - name: Upload iOS arm64 dylibs
         uses: actions/upload-artifact@v4
