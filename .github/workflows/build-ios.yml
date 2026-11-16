@@ -44,6 +44,7 @@ jobs:
           set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
           set(CMAKE_C_COMPILER clang)
           set(CMAKE_CXX_COMPILER clang++)
+          set(CMAKE_STRIP /usr/bin/true)
           set(CMAKE_C_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/iPhoneOS.sdk")
           set(CMAKE_CXX_FLAGS_INIT "-target arm64-apple-ios13.0 -isysroot /opt/iPhoneOS.sdk")
           set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld -L/opt/iPhoneOS.sdk/usr/lib")
@@ -56,6 +57,7 @@ jobs:
 
           cmake -S src/cof -B build/cof-ios -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="$PWD/ios-toolchain.cmake" \
+            -DCMAKE_STRIP=/usr/bin/true \
             -DCMAKE_BUILD_TYPE=Release \
             -D64BIT=ON \
             -DGAMEDIR=cryoffear \
